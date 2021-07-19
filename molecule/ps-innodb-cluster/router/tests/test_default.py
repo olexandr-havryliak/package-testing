@@ -7,6 +7,8 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']
 ).get_hosts('all')
 
+def ip_hostname(var):
+    return "ip-" + os.environ.get(var, 'unused').replace('.', "-")
 
 def test_mysqlsh_version(host):
     cmd = host.run("mysqlsh --version")
@@ -54,10 +56,22 @@ def test_cluster_status(host):
     assert host.check_output("mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | jq -r '.defaultReplicaSet.status'") == "OK"
 
 def test_node1_status(host):
-    assert host.check_output("mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | jq -r '.defaultReplicaSet.topology[\"ps-node1:3306\"].status'") == "ONLINE"
+    hostname = ip_hostname('PS_NODE1_IP')
+    assert host.check_output(
+        "mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | "
+        "jq -r '.defaultReplicaSet.topology[\"ps-node1:3306\", \"" + hostname + ":3306\"].status // empty'"
+    ) == "ONLINE"
 
 def test_node2_status(host):
-    assert host.check_output("mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | jq -r '.defaultReplicaSet.topology[\"ps-node2:3306\"].status'") == "ONLINE"
+    hostname = ip_hostname('PS_NODE2_IP')
+    assert host.check_output(
+        "mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | "
+        "jq -r '.defaultReplicaSet.topology[\"ps-node2:3306\", \"" + hostname + ":3306\"].status // empty'"
+    ) == "ONLINE"
 
 def test_node3_status(host):
-    assert host.check_output("mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | jq -r '.defaultReplicaSet.topology[\"ps-node3:3306\"].status'") == "ONLINE"
+    hostname = ip_hostname('PS_NODE3_IP')
+    assert host.check_output(
+        "mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | "
+        "jq -r '.defaultReplicaSet.topology[\"ps-node3:3306\", \"" + hostname + ":3306\"].status // empty'"
+    ) == "ONLINE"
