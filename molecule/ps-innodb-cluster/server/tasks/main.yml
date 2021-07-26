@@ -25,6 +25,7 @@
         {{ lookup('env','MYSQL_ROUTER_IP') }} mysql-router
         {% for var in ['PS_NODE1_IP', 'PS_NODE2_IP', 'PS_NODE3_IP', 'MYSQL_ROUTER_IP'] %}
         {{ lookup('env', var) }} ip-{{ lookup('env', var) | replace('.', '-') }}
+        {{ lookup('env', var) }} ip-{{ lookup('env', var) | replace('.', '-') }}.us-west-2.compute.internal
         {% endfor %}
         ::1     localhost ip6-localhost ip6-loopback
         ff02::1 ip6-allnodes
